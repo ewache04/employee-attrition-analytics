@@ -1,0 +1,40 @@
+# Environment
+.venv/
+.env
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Logs
+logs/
+*.log
+
+# Data — none of the generated/raw data files are committed.
+# Run `python main.py` to regenerate everything from scratch.
+data/bronze/*.csv
+data/bronze/*.json
+data/silver/
+data/gold/
+data/exports/
+
+# Compiled notebooks output
+.ipynb_checkpoints/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# pytest
+.pytest_cache/
