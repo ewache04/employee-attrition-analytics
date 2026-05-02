@@ -25,29 +25,28 @@ Each CSV has a different schema so import them **one by one** via Text/CSV
 1. **Home → Get Data → Text/CSV**
 2. Navigate to `data/exports/` and select the file
 3. In the preview dialog → click **Transform Data** (not Load)
-4. In Power Query: **right-click the query name** (left panel) → **Rename** → use the name in the table below
-5. Repeat from step 1 for the next file
-6. Once all 10 are loaded → **Home → Close & Apply**
+4. Repeat for each file — no renaming needed, Power BI uses the filename as the table name
+5. Once all 10 are loaded → **Home → Close & Apply**
 
-| File to select                  | Rename query to          |
-|---------------------------------|--------------------------|
-| `employee_data.csv`             | `Employees`              |
-| `attrition_by_department.csv`   | `AttritionByDept`        |
-| `attrition_by_role.csv`         | `AttritionByRole`        |
-| `attrition_by_demographics.csv` | `AttritionByDemographic` |
-| `satisfaction_analysis.csv`     | `SatisfactionAnalysis`   |
-| `salary_analysis.csv`           | `SalaryAnalysis`         |
-| `tenure_analysis.csv`           | `TenureAnalysis`         |
-| `overtime_impact.csv`           | `OvertimeImpact`         |
-| `risk_scores.csv`               | `RiskScores`             |
-| `executive_summary.csv`         | `ExecutiveSummary`       |
+| File to select                  | Default table name in Power BI  |
+|---------------------------------|---------------------------------|
+| `employee_data.csv`             | `employee_data`                 |
+| `attrition_by_department.csv`   | `attrition_by_department`       |
+| `attrition_by_role.csv`         | `attrition_by_role`             |
+| `attrition_by_demographics.csv` | `attrition_by_demographics`     |
+| `satisfaction_analysis.csv`     | `satisfaction_analysis`         |
+| `salary_analysis.csv`           | `salary_analysis`               |
+| `tenure_analysis.csv`           | `tenure_analysis`               |
+| `overtime_impact.csv`           | `overtime_impact`               |
+| `risk_scores.csv`               | `risk_scores`                   |
+| `executive_summary.csv`         | `executive_summary`             |
 
 > **Tip:** After clicking Transform Data on the first file, you can add the remaining 9
 > directly inside Power Query Editor via **New Source → Text/CSV** without closing it.
 > This is faster than repeating the Get Data flow 10 times.
 
 ### C. Set column types in Power Query
-In **Transform Data**, set these explicitly for `Employees`:
+In **Transform Data**, set these explicitly for `employee_data`:
 - `MonthlyIncome`, `Age`, `YearsAtCompany`, `EmployeeNumber` → **Whole Number**
 - `SatisfactionComposite`, `FlightRiskScore`, `IncomeVsLevelMedian` → **Decimal Number**
 - `AttritionRate` in aggregation tables → **Decimal Number**
@@ -68,10 +67,10 @@ Add all measures below to this table.
 // ── Core Attrition ────────────────────────────────────────────────────────
 
 [Total Employees] =
-COUNTROWS(Employees)
+COUNTROWS(employee_data)
 
 [Attrition Count] =
-CALCULATE(COUNTROWS(Employees), Employees[Attrition] = "Yes")
+CALCULATE(COUNTROWS(employee_data), employee_data[Attrition] = "Yes")
 
 [Attrition Rate] =
 DIVIDE([Attrition Count], [Total Employees])
@@ -85,16 +84,16 @@ FORMAT([Attrition Rate], "0.0%")
 // ── Overtime ──────────────────────────────────────────────────────────────
 
 [OT Employees] =
-CALCULATE(COUNTROWS(Employees), Employees[OverTime] = "Yes")
+CALCULATE(COUNTROWS(employee_data), employee_data[OverTime] = "Yes")
 
 [OT Rate] =
 DIVIDE([OT Employees], [Total Employees])
 
 [OT Attrition Rate] =
-CALCULATE([Attrition Rate], Employees[OverTime] = "Yes")
+CALCULATE([Attrition Rate], employee_data[OverTime] = "Yes")
 
 [Non-OT Attrition Rate] =
-CALCULATE([Attrition Rate], Employees[OverTime] = "No")
+CALCULATE([Attrition Rate], employee_data[OverTime] = "No")
 
 [OT Relative Risk] =
 DIVIDE([OT Attrition Rate], [Non-OT Attrition Rate])
@@ -102,77 +101,77 @@ DIVIDE([OT Attrition Rate], [Non-OT Attrition Rate])
 // ── Satisfaction ──────────────────────────────────────────────────────────
 
 [Avg Satisfaction Composite] =
-AVERAGE(Employees[SatisfactionComposite])
+AVERAGE(employee_data[SatisfactionComposite])
 
 [Avg Job Satisfaction] =
-AVERAGE(Employees[JobSatisfaction])
+AVERAGE(employee_data[JobSatisfaction])
 
 [Avg Env Satisfaction] =
-AVERAGE(Employees[EnvironmentSatisfaction])
+AVERAGE(employee_data[EnvironmentSatisfaction])
 
 [Avg Relationship Satisfaction] =
-AVERAGE(Employees[RelationshipSatisfaction])
+AVERAGE(employee_data[RelationshipSatisfaction])
 
 [Avg Work Life Balance] =
-AVERAGE(Employees[WorkLifeBalance])
+AVERAGE(employee_data[WorkLifeBalance])
 
 // ── Compensation ──────────────────────────────────────────────────────────
 
 [Avg Monthly Income] =
-AVERAGE(Employees[MonthlyIncome])
+AVERAGE(employee_data[MonthlyIncome])
 
 [Median Monthly Income] =
-MEDIAN(Employees[MonthlyIncome])
+MEDIAN(employee_data[MonthlyIncome])
 
 [Income Gap vs Level Median] =
-AVERAGE(Employees[IncomeVsLevelMedian])
+AVERAGE(employee_data[IncomeVsLevelMedian])
 
 [Below Median Income Count] =
-CALCULATE(COUNTROWS(Employees), Employees[IncomeVsLevelMedian] < -0.05)
+CALCULATE(COUNTROWS(employee_data), employee_data[IncomeVsLevelMedian] < -0.05)
 
 [Below Median Attrition Rate] =
-CALCULATE([Attrition Rate], Employees[IncomeVsLevelMedian] < -0.05)
+CALCULATE([Attrition Rate], employee_data[IncomeVsLevelMedian] < -0.05)
 
 // ── Risk ──────────────────────────────────────────────────────────────────
 
 [Avg Flight Risk Score] =
-AVERAGE(RiskScores[FlightRiskScore])
+AVERAGE(risk_scores[FlightRiskScore])
 
 [High Risk Count] =
 CALCULATE(
-    COUNTROWS(RiskScores),
-    RiskScores[RiskBand] IN {"High", "Critical"}
+    COUNTROWS(risk_scores),
+    risk_scores[RiskBand] IN {"High", "Critical"}
 )
 
 [Critical Risk Count] =
 CALCULATE(
-    COUNTROWS(RiskScores),
-    RiskScores[RiskBand] = "Critical"
+    COUNTROWS(risk_scores),
+    risk_scores[RiskBand] = "Critical"
 )
 
 [High Risk Rate] =
-DIVIDE([High Risk Count], COUNTROWS(RiskScores))
+DIVIDE([High Risk Count], COUNTROWS(risk_scores))
 
 // ── Tenure & Promotion ────────────────────────────────────────────────────
 
 [Avg Years at Company] =
-AVERAGE(Employees[YearsAtCompany])
+AVERAGE(employee_data[YearsAtCompany])
 
 [Avg Years Since Promotion] =
-AVERAGE(Employees[YearsSinceLastPromotion])
+AVERAGE(employee_data[YearsSinceLastPromotion])
 
 [Stagnation Risk Count] =
-CALCULATE(COUNTROWS(Employees), Employees[YearsSinceLastPromotion] >= 4)
+CALCULATE(COUNTROWS(employee_data), employee_data[YearsSinceLastPromotion] >= 4)
 
 [Early Tenure Attrition Rate] =
 CALCULATE(
     [Attrition Rate],
-    Employees[YearsAtCompany] >= 1,
-    Employees[YearsAtCompany] <= 3
+    employee_data[YearsAtCompany] >= 1,
+    employee_data[YearsAtCompany] <= 3
 )
 
 [Stable Tenure Attrition Rate] =
-CALCULATE([Attrition Rate], Employees[YearsAtCompany] > 10)
+CALCULATE([Attrition Rate], employee_data[YearsAtCompany] > 10)
 
 // ── Dynamic Titles ────────────────────────────────────────────────────────
 
@@ -260,7 +259,7 @@ For each card:
 
 **3. Attrition by Department** — Clustered Bar Chart
 - X: 20, Y: 195, W: 580, H: 260
-- Fields: X-axis = `AttritionByDept[Department]`, Y-axis = `AttritionByDept[AttritionRate]`
+- Fields: X-axis = `attrition_by_department[Department]`, Y-axis = `attrition_by_department[AttritionRate]`
 - Format → Data colors: conditional — use gradient Red (`#E74C3C`) to Blue (`#3498DB`)
 - Format → Data labels: ON, color `#F0F6FC`, font size 10
 - Add **Constant Line**: value = `[Attrition Rate]`, label "Company Avg", color `#F39C12`, dashed
@@ -269,7 +268,7 @@ For each card:
 
 **4. Attrition by Job Role** — Horizontal Bar Chart
 - X: 640, Y: 195, W: 620, H: 260
-- Fields: Y-axis = `AttritionByRole[JobRole]`, X-axis = `AttritionByRole[AttritionRate]`
+- Fields: Y-axis = `attrition_by_role[JobRole]`, X-axis = `attrition_by_role[AttritionRate]`
 - Sort: Descending by AttritionRate
 - Format → Data colors: color rule — value >= 0.25 = `#E74C3C`, 0.15–0.25 = `#E67E22`, < 0.15 = `#3498DB`
 - Add **Constant Line**: value = `[Attrition Rate]`, color `#F39C12`, dashed
@@ -277,7 +276,7 @@ For each card:
 
 **5. Tenure Attrition Curve** — Area Chart
 - X: 20, Y: 465, W: 1240, H: 235
-- Fields: X-axis = `TenureAnalysis[YearsAtCompany]`, Y-axis = `TenureAnalysis[AttritionRate]`
+- Fields: X-axis = `tenure_analysis[YearsAtCompany]`, Y-axis = `tenure_analysis[AttritionRate]`
 - Format → Line color: `#E74C3C`, area fill: `#E74C3C` at 15% transparency
 - Add **Reference band**: X = 1 to 3 (color `#E74C3C`, 8% fill), X = 5 to 8 (color `#E67E22`, 8% fill)
 - Add **Constant Line**: `[Attrition Rate]`, color `#F39C12`, dashed, labeled "Company Avg"
@@ -293,7 +292,7 @@ For each card:
 
 **1. Risk Band Donut** — Donut Chart
 - X: 20, Y: 80, W: 320, H: 320
-- Fields: Legend = `RiskScores[RiskBand]`, Values = count of `RiskScores[EmployeeNumber]`
+- Fields: Legend = `risk_scores[RiskBand]`, Values = count of `risk_scores[EmployeeNumber]`
 - Colors: Low=`#27AE60`, Moderate=`#F39C12`, High=`#E67E22`, Critical=`#E74C3C`
 - Inner radius: 55%, detail labels ON (show %, bold)
 - Title: "Flight Risk Distribution"
@@ -310,7 +309,7 @@ For each card:
 
 **3. Risk by Department Matrix** — Matrix visual
 - X: 20, Y: 420, W: 450, H: 260
-- Rows = `Employees[Department]`, Columns = `RiskScores[RiskBand]`, Values = count EmployeeNumber
+- Rows = `employee_data[Department]`, Columns = `risk_scores[RiskBand]`, Values = count EmployeeNumber
 - Format → Conditional formatting on Values: color scale Low=`#27AE60` → High=`#E74C3C`
 - Title: "Risk Band by Department"
 
@@ -322,7 +321,7 @@ For each card:
 - Conditional formatting on **FlightRiskScore**: data bar, `#E74C3C`
 - Format → Header: `#21262D` bg, bold white text
 - Title: "Employee Flight Risk Register  (sorted by risk score)"
-- Add slicer: `RiskScores[RiskBand]` — tile slicer, H:40, full width top of table area
+- Add slicer: `risk_scores[RiskBand]` — tile slicer, H:40, full width top of table area
 
 ---
 
@@ -334,7 +333,7 @@ For each card:
 
 **1. Overtime Impact** — Clustered Bar
 - X: 20, Y: 80, W: 380, H: 300
-- Fields: X-axis = `OvertimeImpact[OverTime]` (0/1 mapped as No/Yes), Y-axis = `OvertimeImpact[AttritionRate]`
+- Fields: X-axis = `overtime_impact[OverTime]` (0/1 mapped as No/Yes), Y-axis = `overtime_impact[AttritionRate]`
 - Colors: No=`#27AE60`, Yes=`#E74C3C`
 - Data labels ON
 - Title: "Attrition Rate: Overtime vs No Overtime"
@@ -342,32 +341,32 @@ For each card:
 
 **2. Overtime × Satisfaction Heatmap** — Matrix
 - X: 420, Y: 80, W: 420, H: 300
-- Rows = `OvertimeImpact[JobSatisfaction]`, Columns = `OvertimeImpact[OverTime]`, Values = `OvertimeImpact[AttritionRate]`
+- Rows = `overtime_impact[JobSatisfaction]`, Columns = `overtime_impact[OverTime]`, Values = `overtime_impact[AttritionRate]`
 - Conditional formatting: gradient `#27AE60` (0%) → `#E74C3C` (50%+)
 - Title: "The Overtime Trap  —  Attrition by Satisfaction × OT"
 
 **3. Business Travel Attrition** — Clustered Bar
 - X: 860, Y: 80, W: 400, H: 300
-- Fields: X-axis = `Employees[BusinessTravel]`, Y-axis = `[Attrition Rate]`
+- Fields: X-axis = `employee_data[BusinessTravel]`, Y-axis = `[Attrition Rate]`
 - Sort: Descending
 - Colors: Non-Travel=`#27AE60`, Travel_Rarely=`#F39C12`, Travel_Frequently=`#E74C3C`
 - Title: "Business Travel Burnout"
 
 **4. Attrition by Distance Tier** — Funnel or Bar
 - X: 20, Y: 400, W: 380, H: 280
-- Fields: Y-axis = `Employees[DistanceTier]`, X-axis = `[Attrition Rate]`
+- Fields: Y-axis = `employee_data[DistanceTier]`, X-axis = `[Attrition Rate]`
 - Colors: gradient from `#27AE60` to `#E74C3C` by value
 - Title: "The Distance Gradient"
 
 **5. Attrition by Marital Status** — Donut or Clustered Bar
 - X: 420, Y: 400, W: 380, H: 280
-- Fields: X-axis = `Employees[MaritalStatus]`, Y-axis = `[Attrition Rate]`
+- Fields: X-axis = `employee_data[MaritalStatus]`, Y-axis = `[Attrition Rate]`
 - Colors: Single=`#E74C3C`, Married=`#27AE60`, Divorced=`#F39C12`
 - Title: "Single Employee Vulnerability"
 
 **6. Stock Option Attrition** — Line + Bar combo
 - X: 820, Y: 400, W: 440, H: 280
-- Fields: X-axis = `Employees[StockOptionLevel]`, Line Y = `[Attrition Rate]`, Bar Y = count
+- Fields: X-axis = `employee_data[StockOptionLevel]`, Line Y = `[Attrition Rate]`, Bar Y = count
 - Line color: `#E74C3C`, Bar color: `#3498DB` (low opacity)
 - Title: "Stock Option Paradox  —  Level 1 retains best"
 
@@ -395,15 +394,15 @@ Use **KPI visual** (not Card) so you can set target = 3.0 (healthy benchmark):
 
 **2. Satisfaction vs Attrition — All 4 Dimensions** — Line Chart
 - X: 20, Y: 200, W: 780, H: 320
-- Fields: X-axis = `SatisfactionAnalysis[Score]`, Y-axis = `SatisfactionAnalysis[AttritionRate]`
-- Legend = `SatisfactionAnalysis[SatisfactionDimension]`
+- Fields: X-axis = `satisfaction_analysis[Score]`, Y-axis = `satisfaction_analysis[AttritionRate]`
+- Legend = `satisfaction_analysis[SatisfactionDimension]`
 - Colors: environment=`#3498DB`, job=`#E74C3C`, relationship=`#27AE60`, WLB=`#F39C12`
 - Add reference line at Y=0.161 (company avg), dashed `#8B949E`
 - Title: "How Each Satisfaction Dimension Drives Attrition"
 
 **3. Satisfaction Trinity Heatmap** — Matrix
 - X: 820, Y: 200, W: 440, H: 320
-- Rows = `Employees[JobSatisfaction_Label]`, Columns = `Employees[EnvironmentSatisfaction_Label]`
+- Rows = `employee_data[JobSatisfaction_Label]`, Columns = `employee_data[EnvironmentSatisfaction_Label]`
 - Values = `[Attrition Rate]`
 - Conditional formatting: Red-Green diverging
 - Title: "The Satisfaction Trinity  —  Combined Effect"
@@ -416,7 +415,7 @@ Use **KPI visual** (not Card) so you can set target = 3.0 (healthy benchmark):
 
 **5. Work-Life Balance Breakdown** — Bar
 - X: 620, Y: 540, W: 640, H: 160
-- Fields: X=`Employees[WorkLifeBalance_Label]`, Y=`[Attrition Rate]`
+- Fields: X=`employee_data[WorkLifeBalance_Label]`, Y=`[Attrition Rate]`
 - Sort: by score ascending (Bad → Best)
 - Color gradient: `#E74C3C` → `#27AE60`
 - Title: "Work-Life Balance vs Attrition"
@@ -431,23 +430,23 @@ Use **KPI visual** (not Card) so you can set target = 3.0 (healthy benchmark):
 
 **1. Income by Job Level** — Box Plot (use Clustered Bar as approximation)
 - X: 20, Y: 80, W: 580, H: 300
-- Fields: X=`SalaryAnalysis[JobLevel]`, Y=`SalaryAnalysis[MedianIncome]`, Tooltips = Min/Max/Mean
+- Fields: X=`salary_analysis[JobLevel]`, Y=`salary_analysis[MedianIncome]`, Tooltips = Min/Max/Mean
 - Format → Data colors: gradient by JobLevel (darker = higher)
 - Add error bars: use Min and Max columns
 - Title: "Monthly Income Distribution by Job Level"
 
 **2. Salary Compression Matrix** — Matrix
 - X: 620, Y: 80, W: 640, H: 300
-- Rows = `SalaryAnalysis[JobLevel]`, Columns = `SalaryAnalysis[JobRole]`
-- Values = `SalaryAnalysis[AvgIncomeVsLevelMedian]` (formatted as %)
+- Rows = `salary_analysis[JobLevel]`, Columns = `salary_analysis[JobRole]`
+- Values = `salary_analysis[AvgIncomeVsLevelMedian]` (formatted as %)
 - Conditional formatting: diverging — Red (`#E74C3C`) below 0, Green (`#27AE60`) above 0, center = 0
 - Title: "Salary Compression  —  Income vs Level Median (% deviation)"
 - This reveals exactly which roles are systematically underpaid within their level
 
 **3. Income vs Attrition Scatter** — Scatter chart
 - X: 20, Y: 400, W: 580, H: 280
-- X-axis = `SalaryAnalysis[MeanIncome]`, Y-axis = `SalaryAnalysis[AttritionRate]`
-- Size = `SalaryAnalysis[TotalEmployees]`, Legend = `SalaryAnalysis[JobRole]`
+- X-axis = `salary_analysis[MeanIncome]`, Y-axis = `salary_analysis[AttritionRate]`
+- Size = `salary_analysis[TotalEmployees]`, Legend = `salary_analysis[JobRole]`
 - Add trend line (Power BI Analytics pane)
 - Title: "Income vs Attrition Rate by Role  (bubble size = headcount)"
 
@@ -459,7 +458,7 @@ Use **KPI visual** (not Card) so you can set target = 3.0 (healthy benchmark):
 
 **5. Salary Hike vs Attrition** — Scatter
 - X: 950, Y: 400, W: 310, H: 280
-- X=`Employees[PercentSalaryHike]`, Y=`[Attrition Rate]`, size=headcount
+- X=`employee_data[PercentSalaryHike]`, Y=`[Attrition Rate]`, size=headcount
 - Title: "Salary Hike % vs Attrition"
 
 ---
@@ -472,7 +471,7 @@ Use **KPI visual** (not Card) so you can set target = 3.0 (healthy benchmark):
 
 **1. The Dual-Crisis Curve** — Area + Line Combo
 - X: 20, Y: 80, W: 800, H: 320
-- Line: `TenureAnalysis[YearsAtCompany]` vs `TenureAnalysis[AttritionRate]`
+- Line: `tenure_analysis[YearsAtCompany]` vs `tenure_analysis[AttritionRate]`
 - Line color: `#E74C3C`, line width: 2.5px
 - Area fill: `#E74C3C` at 15% opacity
 - Reference bands: Year 1–3 (Crisis 1, `#E74C3C` 10%), Year 5–8 (Crisis 2, `#E67E22` 10%)
@@ -482,7 +481,7 @@ Use **KPI visual** (not Card) so you can set target = 3.0 (healthy benchmark):
 
 **2. Promotion Stagnation** — Bar Chart
 - X: 840, Y: 80, W: 420, H: 320
-- X=`Employees[YearsSinceLastPromotion]` (binned 0-2, 3-4, 5+)
+- X=`employee_data[YearsSinceLastPromotion]` (binned 0-2, 3-4, 5+)
 - Y=`[Attrition Rate]`
 - Color rule: YearsSince >= 4 = `#E74C3C`, else `#3498DB`
 - Reference line at company avg
@@ -498,13 +497,13 @@ Use **KPI visual** (not Card) so you can set target = 3.0 (healthy benchmark):
 
 **4. Training vs Attrition** — Scatter
 - X: 620, Y: 420, W: 640, H: 260
-- X=`Employees[TrainingTimesLastYear]`, Y=`[Attrition Rate]` (aggregated)
+- X=`employee_data[TrainingTimesLastYear]`, Y=`[Attrition Rate]` (aggregated)
 - Add trend line
 - Title: "Training Investment vs Attrition  —  Does training retain?"
 
 **5. Age Band Attrition** — Bar
 - X: 620, Y: 420 — swap with training if preferred
-- X=`Employees[AgeBand]`, Y=`[Attrition Rate]`
+- X=`employee_data[AgeBand]`, Y=`[Attrition Rate]`
 - Sort by AgeBand ascending
 - Color gradient young (`#E74C3C`) → older (`#27AE60`)
 - Title: "Attrition by Age Band"
@@ -549,10 +548,10 @@ Sync these slicers across all pages (**View → Sync slicers**):
 
 | Slicer     | Field                   | Style           |
 |------------|-------------------------|-----------------|
-| Department | `Employees[Department]` | Dropdown        |
-| Job Role   | `Employees[JobRole]`    | Dropdown        |
-| Attrition  | `Employees[Attrition]`  | Tile (Yes / No) |
-| Risk Band  | `RiskScores[RiskBand]`  | Tile            |
+| Department | `employee_data[Department]` | Dropdown        |
+| Job Role   | `employee_data[JobRole]`    | Dropdown        |
+| Attrition  | `employee_data[Attrition]`  | Tile (Yes / No) |
+| Risk Band  | `risk_scores[RiskBand]`  | Tile            |
 
 Place slicers in a collapsible filter panel triggered by a button (use bookmarks):
 - Bookmark 1: "Filters Open" — slicers visible

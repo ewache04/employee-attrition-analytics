@@ -9,20 +9,20 @@ Use this as your field guide when building visuals or writing DAX.
 
 | Table Name in Power BI | Source File | Rows | Purpose |
 |---|---|---|---|
-| `Employees` | employee_data.csv | 1,470 | Main fact table — one row per employee |
-| `RiskScores` | risk_scores.csv | 1,470 | Flight risk score per employee |
-| `AttritionByDept` | attrition_by_department.csv | 3 | Attrition KPIs rolled up by department |
-| `AttritionByRole` | attrition_by_role.csv | 11 | Attrition KPIs by department + job role |
-| `AttritionByDemographic` | attrition_by_demographics.csv | 18 | Attrition across age, marital status, education, distance |
-| `SatisfactionAnalysis` | satisfaction_analysis.csv | 16 | How each satisfaction score level drives attrition |
-| `SalaryAnalysis` | salary_analysis.csv | 26 | Income statistics by job level and role |
-| `TenureAnalysis` | tenure_analysis.csv | 37 | Attrition and career patterns by years at company |
-| `OvertimeImpact` | overtime_impact.csv | 8 | How overtime and job satisfaction interact on attrition |
-| `ExecutiveSummary` | executive_summary.csv | 9 | Top-level KPI snapshot for headline cards |
+| `employee_data` | employee_data.csv | 1,470 | Main fact table — one row per employee |
+| `risk_scores` | risk_scores.csv | 1,470 | Flight risk score per employee |
+| `attrition_by_department` | attrition_by_department.csv | 3 | Attrition KPIs rolled up by department |
+| `attrition_by_role` | attrition_by_role.csv | 11 | Attrition KPIs by department + job role |
+| `attrition_by_demographics` | attrition_by_demographics.csv | 18 | Attrition across age, marital status, education, distance |
+| `satisfaction_analysis` | satisfaction_analysis.csv | 16 | How each satisfaction score level drives attrition |
+| `salary_analysis` | salary_analysis.csv | 26 | Income statistics by job level and role |
+| `tenure_analysis` | tenure_analysis.csv | 37 | Attrition and career patterns by years at company |
+| `overtime_impact` | overtime_impact.csv | 8 | How overtime and job satisfaction interact on attrition |
+| `executive_summary` | executive_summary.csv | 9 | Top-level KPI snapshot for headline cards |
 
 ---
 
-## Employees
+## employee_data
 **Source:** `employee_data.csv` | **Rows:** 1,470 | **Grain:** One row per employee
 
 This is the **main fact table**. Every other table is a pre-aggregated summary derived from this one.
@@ -81,7 +81,7 @@ Use `Employees` whenever you need individual-level filtering, drill-through, or 
 
 ---
 
-## RiskScores
+## risk_scores
 **Source:** `risk_scores.csv` | **Rows:** 1,470 | **Grain:** One row per employee
 
 A lean version of the employee data focused purely on risk scoring.
@@ -101,7 +101,7 @@ It has fewer columns than `Employees` so it's faster to render in large visuals.
 
 ---
 
-## AttritionByDept
+## attrition_by_department
 **Source:** `attrition_by_department.csv` | **Rows:** 3 | **Grain:** One row per department
 
 Pre-aggregated department summary. Use this for department-level bar charts and KPI comparisons.
@@ -120,7 +120,7 @@ Faster to render than aggregating `Employees` at report time.
 
 ---
 
-## AttritionByRole
+## attrition_by_role
 **Source:** `attrition_by_role.csv` | **Rows:** 11 | **Grain:** One row per department × job role
 
 Department and role breakdown. Use for horizontal bar charts sorted by AttritionRate.
@@ -139,7 +139,7 @@ Reveals which specific roles drive departmental attrition.
 
 ---
 
-## AttritionByDemographic
+## attrition_by_demographics
 **Source:** `attrition_by_demographics.csv` | **Rows:** 18 | **Grain:** One row per dimension value
 
 Attrition rates across four demographic dimensions in a single tall table.
@@ -158,7 +158,7 @@ Use a slicer on `Dimension` to switch between views.
 
 ---
 
-## SatisfactionAnalysis
+## satisfaction_analysis
 **Source:** `satisfaction_analysis.csv` | **Rows:** 16 | **Grain:** One row per satisfaction dimension × score level
 
 Shows how each score level (1–4) within each satisfaction dimension maps to attrition rate.
@@ -175,7 +175,7 @@ Use for line charts to show the "as satisfaction falls, attrition rises" trend.
 
 ---
 
-## SalaryAnalysis
+## salary_analysis
 **Source:** `salary_analysis.csv` | **Rows:** 26 | **Grain:** One row per job level × job role
 
 Income statistics and attrition rates broken down by seniority and role.
@@ -195,7 +195,7 @@ Use for compensation analysis — spotting underpaid roles and income compressio
 
 ---
 
-## TenureAnalysis
+## tenure_analysis
 **Source:** `tenure_analysis.csv` | **Rows:** 37 | **Grain:** One row per year of tenure (0–40)
 
 Year-by-year attrition and career metrics. The source of the "Dual-Crisis Curve" chart.
@@ -212,7 +212,7 @@ Use for area/line charts with YearsAtCompany on the X-axis.
 
 ---
 
-## OvertimeImpact
+## overtime_impact
 **Source:** `overtime_impact.csv` | **Rows:** 8 | **Grain:** One row per overtime status × job satisfaction score
 
 The interaction between overtime and satisfaction. 8 rows = 2 (Yes/No) × 4 (score levels).
@@ -230,7 +230,7 @@ Use as a heatmap matrix — the strongest two-factor attrition predictor in the 
 
 ---
 
-## ExecutiveSummary
+## executive_summary
 **Source:** `executive_summary.csv` | **Rows:** 9 | **Grain:** One row per KPI metric
 
 Nine top-level numbers for headline cards. Regenerated every time the pipeline runs.
@@ -259,8 +259,8 @@ Use each row as a separate card visual using a LOOKUPVALUE DAX measure.
 ```dax
 [Total Employees KPI] =
 CALCULATE(
-    SUM(ExecutiveSummary[Value]),
-    ExecutiveSummary[Metric] = "Total Employees"
+    SUM(executive_summary[Value]),
+    executive_summary[Metric] = "Total Employees"
 )
 ```
 
