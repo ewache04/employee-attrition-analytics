@@ -17,22 +17,34 @@ follow this guide in Power BI Desktop and the result is a presentation-grade rep
 4. Click **Keep current theme** on the color dialog → **Apply**
 
 ### B. Load all data tables
-**Get Data → Text/CSV → Folder** → select `data/exports/`
 
-Import these tables (10 files):
+Each CSV has a different schema so import them **one by one** via Text/CSV
+(the Folder connector shows file metadata, not data — do not use it here).
 
-| File | Rename to in Power BI |
-|---|---|
-| `employee_data.csv` | `Employees` |
-| `attrition_by_department.csv` | `AttritionByDept` |
-| `attrition_by_role.csv` | `AttritionByRole` |
+**Repeat these steps for each file below:**
+1. **Home → Get Data → Text/CSV**
+2. Navigate to `data/exports/` and select the file
+3. In the preview dialog → click **Transform Data** (not Load)
+4. In Power Query: **right-click the query name** (left panel) → **Rename** → use the name in the table below
+5. Repeat from step 1 for the next file
+6. Once all 10 are loaded → **Home → Close & Apply**
+
+| File to select                  | Rename query to          |
+|---------------------------------|--------------------------|
+| `employee_data.csv`             | `Employees`              |
+| `attrition_by_department.csv`   | `AttritionByDept`        |
+| `attrition_by_role.csv`         | `AttritionByRole`        |
 | `attrition_by_demographics.csv` | `AttritionByDemographic` |
-| `satisfaction_analysis.csv` | `SatisfactionAnalysis` |
-| `salary_analysis.csv` | `SalaryAnalysis` |
-| `tenure_analysis.csv` | `TenureAnalysis` |
-| `overtime_impact.csv` | `OvertimeImpact` |
-| `risk_scores.csv` | `RiskScores` |
-| `executive_summary.csv` | `ExecutiveSummary` |
+| `satisfaction_analysis.csv`     | `SatisfactionAnalysis`   |
+| `salary_analysis.csv`           | `SalaryAnalysis`         |
+| `tenure_analysis.csv`           | `TenureAnalysis`         |
+| `overtime_impact.csv`           | `OvertimeImpact`         |
+| `risk_scores.csv`               | `RiskScores`             |
+| `executive_summary.csv`         | `ExecutiveSummary`       |
+
+> **Tip:** After clicking Transform Data on the first file, you can add the remaining 9
+> directly inside Power Query Editor via **New Source → Text/CSV** without closing it.
+> This is faster than repeating the Get Data flow 10 times.
 
 ### C. Set column types in Power Query
 In **Transform Data**, set these explicitly for `Employees`:
@@ -230,14 +242,14 @@ IF(
 
 **2. Six KPI Cards** (Y:80, H:100, equally spaced across width)
 
-| # | Measure | Label | Accent Color |
-|---|---|---|---|
-| 1 | `[Total Employees]` | Total Employees | `#3498DB` |
-| 2 | `[Attrition Rate %]` | Attrition Rate | `#E74C3C` |
-| 3 | `[Avg Monthly Income]` + Format $#,0 | Avg Monthly Income | `#27AE60` |
-| 4 | `[OT Rate]` Format % | Overtime Rate | `#E67E22` |
-| 5 | `[High Risk Count]` | High/Critical Risk | `#8E44AD` |
-| 6 | `[Avg Satisfaction Composite]` Format 0.00 | Avg Satisfaction | `#F39C12` |
+| # | Measure                                    | Label              | Accent Color |
+|---|--------------------------------------------|--------------------|--------------|
+| 1 | `[Total Employees]`                        | Total Employees    | `#3498DB`    |
+| 2 | `[Attrition Rate %]`                       | Attrition Rate     | `#E74C3C`    |
+| 3 | `[Avg Monthly Income]` + Format $#,0       | Avg Monthly Income | `#27AE60`    |
+| 4 | `[OT Rate]` Format %                       | Overtime Rate      | `#E67E22`    |
+| 5 | `[High Risk Count]`                        | High/Critical Risk | `#8E44AD`    |
+| 6 | `[Avg Satisfaction Composite]` Format 0.00 | Avg Satisfaction   | `#F39C12`    |
 
 For each card:
 - Visual: **Card**
@@ -289,12 +301,12 @@ For each card:
 
 **2. Risk KPI Cards** (horizontal row, Y:80, right of donut)
 
-| Measure | Label |
-|---|---|
-| `[High Risk Count]` | High/Critical Risk |
-| `[Critical Risk Count]` | Critical Risk |
-| `[High Risk Rate]` Format % | High Risk Rate |
-| `[OT Relative Risk]` Format 0.0x | OT Relative Risk |
+| Measure                          | Label              |
+|----------------------------------|--------------------|
+| `[High Risk Count]`              | High/Critical Risk |
+| `[Critical Risk Count]`          | Critical Risk      |
+| `[High Risk Rate]` Format %      | High Risk Rate     |
+| `[OT Relative Risk]` Format 0.0x | OT Relative Risk   |
 
 **3. Risk by Department Matrix** — Matrix visual
 - X: 20, Y: 420, W: 450, H: 260
@@ -369,12 +381,12 @@ For each card:
 
 **1. Four Satisfaction KPI Cards** (horizontal row, Y:80)
 
-| Measure | Label | Icon hint |
-|---|---|---|
-| `[Avg Env Satisfaction]` Format 0.00 | Environment | |
-| `[Avg Job Satisfaction]` Format 0.00 | Job | |
-| `[Avg Relationship Satisfaction]` Format 0.00 | Relationship | |
-| `[Avg Work Life Balance]` Format 0.00 | Work-Life Balance | |
+| Measure                                       | Label             | Icon hint |
+|-----------------------------------------------|-------------------|-----------|
+| `[Avg Env Satisfaction]` Format 0.00          | Environment       |           |
+| `[Avg Job Satisfaction]` Format 0.00          | Job               |           |
+| `[Avg Relationship Satisfaction]` Format 0.00 | Relationship      |           |
+| `[Avg Work Life Balance]` Format 0.00         | Work-Life Balance |           |
 
 Use **KPI visual** (not Card) so you can set target = 3.0 (healthy benchmark):
 - Goal = 3 (acceptable threshold)
@@ -535,12 +547,12 @@ Create a hidden 7th page ("Employee Detail") with drillthrough field = `Employee
 
 Sync these slicers across all pages (**View → Sync slicers**):
 
-| Slicer | Field | Style |
-|---|---|---|
-| Department | `Employees[Department]` | Dropdown |
-| Job Role | `Employees[JobRole]` | Dropdown |
-| Attrition | `Employees[Attrition]` | Tile (Yes / No) |
-| Risk Band | `RiskScores[RiskBand]` | Tile |
+| Slicer     | Field                   | Style           |
+|------------|-------------------------|-----------------|
+| Department | `Employees[Department]` | Dropdown        |
+| Job Role   | `Employees[JobRole]`    | Dropdown        |
+| Attrition  | `Employees[Attrition]`  | Tile (Yes / No) |
+| Risk Band  | `RiskScores[RiskBand]`  | Tile            |
 
 Place slicers in a collapsible filter panel triggered by a button (use bookmarks):
 - Bookmark 1: "Filters Open" — slicers visible
@@ -551,14 +563,14 @@ Place slicers in a collapsible filter panel triggered by a button (use bookmarks
 
 ## 7. Conditional Formatting Rules Summary
 
-| Visual | Column | Rule |
-|---|---|---|
-| Risk Register Table | RiskBand | Critical=#E74C3C bg, High=#E67E22, Moderate=#F39C12, Low=#27AE60 |
-| Risk Register Table | FlightRiskScore | Data bar, color #E74C3C |
-| Salary Compression Matrix | AvgIncomeVsLevelMedian | Diverging: <0 = Red, >0 = Green, 0 = white |
-| Any Attrition Rate | Value > 0.25 | Bold font + `#E74C3C` text color |
-| KPI Cards | Attrition Rate | Target = 0.10; above = red, below = green |
-| Satisfaction KPI | Score < 2.5 | Red background indicator |
+| Visual                    | Column                 | Rule                                                             |
+|---------------------------|------------------------|------------------------------------------------------------------|
+| Risk Register Table       | RiskBand               | Critical=#E74C3C bg, High=#E67E22, Moderate=#F39C12, Low=#27AE60 |
+| Risk Register Table       | FlightRiskScore        | Data bar, color #E74C3C                                          |
+| Salary Compression Matrix | AvgIncomeVsLevelMedian | Diverging: <0 = Red, >0 = Green, 0 = white                       |
+| Any Attrition Rate        | Value > 0.25           | Bold font + `#E74C3C` text color                                 |
+| KPI Cards                 | Attrition Rate         | Target = 0.10; above = red, below = green                        |
+| Satisfaction KPI          | Score < 2.5            | Red background indicator                                         |
 
 ---
 
