@@ -45,7 +45,8 @@ class GoldAggregator:
     def _employee_data_export(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Flat, human-readable employee-level table for Power BI.
-        Decodes all binary-encoded columns back to readable labels.
+        Decodes all binary-encoded columns back to readable labels
+        and merges the flight-risk score from the risk scoring model.
         """
         out = df.copy()
         out = out.drop(columns=["_silver_ts"], errors="ignore")
@@ -55,21 +56,14 @@ class GoldAggregator:
         out["GenderLabel"] = out["Gender"].map({1: "Male", 0: "Female"})
         out = out.drop(columns=["Gender"])
 
-        # Flatten category columns to string
+        # Flatten category columns to plain strings
         for col in out.select_dtypes(include="category").columns:
             out[col] = out[col].astype(str)
 
-        out["RiskBand"] = pd.cut(
-            out["FlightRiskScore"] if "FlightRiskScore" in out.columns
-            else self._compute_risk_scores(df)["FlightRiskScore"],
-            bins=[0, 0.30, 0.50, 0.70, 1.01],
-            labels=["Low", "Moderate", "High", "Critical"],
-            right=False,
-        ).astype(str) if "FlightRiskScore" not in out.columns else out.get("RiskBand", "Unknown")
-
-        # Merge risk score in if not already present
+        # Merge risk score — drop duplicate RiskBand if already present
+        out = out.drop(columns=["RiskBand", "FlightRiskScore"], errors="ignore")
         risk = self._compute_risk_scores(df)[["EmployeeNumber", "FlightRiskScore", "RiskBand"]]
-        out = out.merge(risk, on="EmployeeNumber", how="left", suffixes=("", "_risk"))
+        out = out.merge(risk, on="EmployeeNumber", how="left")
 
         return out
 
@@ -177,7 +171,7 @@ class GoldAggregator:
         )
 
     def _overtime_impact(self, df: pd.DataFrame) -> pd.DataFrame:
-        return (
+        result = (
             df.groupby(["OverTime", "JobSatisfaction"])
             .agg(
                 TotalEmployees=("Attrition", "count"),
@@ -187,6 +181,8 @@ class GoldAggregator:
             .round(4)
             .reset_index()
         )
+        result["OverTime"] = result["OverTime"].map({1: "Yes", 0: "No"})
+        return result
 
     # ── Risk Scoring ──────────────────────────────────────────────────────────
 
