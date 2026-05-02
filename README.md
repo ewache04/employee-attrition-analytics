@@ -86,7 +86,7 @@ See `docs/powerbi_integration.md` for the full page-by-page setup guide.
 ## Project Structure
 
 ```
-Employee Attrition/
+EmployeeAttrition/
 │
 ├── main.py                          # Pipeline entry point
 ├── requirements.txt

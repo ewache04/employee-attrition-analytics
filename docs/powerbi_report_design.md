@@ -13,7 +13,7 @@ follow this guide in Power BI Desktop and the result is a presentation-grade rep
 ### A. Import the theme
 1. Open `employee_attrition_report.pbix` in Power BI Desktop
 2. **View → Themes → Browse for themes**
-3. Select `powerbi/theme.json`
+3. Select `C:\Documents\GitHubRepos\PowerBIProject\EmployeeAttrition\powerbi\theme.json`
 4. Click **Keep current theme** on the color dialog → **Apply**
 
 ### B. Load all data tables
@@ -23,7 +23,7 @@ Each CSV has a different schema so import them **one by one** via Text/CSV
 
 **Repeat these steps for each file below:**
 1. **Home → Get Data → Text/CSV**
-2. Navigate to `data/exports/` and select the file
+2. Navigate to `C:\Documents\GitHubRepos\PowerBIProject\EmployeeAttrition\data\exports\` and select the file
 3. In the preview dialog → click **Transform Data** (not Load)
 4. Repeat for each file — no renaming needed, Power BI uses the filename as the table name
 5. Once all 10 are loaded → **Home → Close & Apply**
